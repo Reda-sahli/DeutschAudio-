@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="de" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+  <meta name="author" content="Sahli Reda">
+  <meta name="copyright" content="Sahli Reda">
+  <meta name="description" content="DeutschAudio Portal · German Language Audio Learning Platform by Sahli Reda">
+  <title>DeutschAudio Portal · by Sahli Reda (A1 Spektrum Deutsch)</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          screens: {
+            'xs': '420px',
+          },
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+              800: '#3730a3',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-screen transition-colors duration-200">
+
+  <!-- Hidden Native HTML5 Audio Element -->
+  <audio id="main-audio" preload="metadata"></audio>
+
+  <!-- Sticky Top Navbar -->
+  <header class="sticky top-0 z-30 glass-panel border-b border-slate-200/80 dark:border-slate-800/80 shadow-xs">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between gap-3">
+      
+      <!-- Brand & German Flag Emblem & Sahli Reda Attribution -->
+      <div class="flex items-center gap-2.5 min-w-0">
+        <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-slate-900 via-indigo-900 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/20 flex-shrink-0">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+          </svg>
+        </div>
+        <div class="min-w-0">
+          <div class="flex items-center gap-1.5">
+            <h1 class="text-sm sm:text-lg font-extrabold tracking-tight text-slate-900 dark:text-white leading-tight truncate">
+              DeutschAudio <span class="text-indigo-600 dark:text-indigo-400">Portal</span>
+            </h1>
+            <span class="de-flag-pill shadow-xs hidden xs:inline-flex" title="Deutsch als Fremdsprache">
+              <span class="bg-black"></span>
+              <span class="bg-red-600"></span>
+              <span class="bg-amber-400"></span>
+            </span>
+          </div>
+          <p id="app-subtitle-text" class="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 font-medium truncate">
+            by <span class="font-bold text-slate-700 dark:text-slate-200">Sahli Reda</span> · Spektrum A1+ (12 Kapitel)
+          </p>
+        </div>
+      </div>
+
+      <!-- Desktop Search Bar -->
+      <div class="flex-1 max-w-md mx-2 hidden sm:block relative">
+        <div class="relative">
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+          <input 
+            type="text" 
+            id="search-input"
+            placeholder="Suche nach Track (z. B. '02', 'Begrüßung', 'Einkaufen')..."
+            class="w-full pl-9 pr-16 py-2 rounded-xl text-xs sm:text-sm bg-slate-100 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all text-slate-900 dark:text-white placeholder-slate-400"
+          >
+          <div class="absolute inset-y-0 right-0 pr-2.5 flex items-center gap-1">
+            <button 
+              id="clear-search-btn"
+              class="hidden text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1"
+              title="Suche leeren"
+            >
+              <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            <kbd class="hidden md:inline-block px-1.5 py-0.5 text-[10px] font-mono text-slate-400 bg-slate-200/80 dark:bg-slate-700/80 rounded border border-slate-300 dark:border-slate-600">Ctrl+K</kbd>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Header Actions (Language Switcher & Dark Mode) -->
+      <div class="flex items-center gap-2 flex-shrink-0">
+        <!-- English / German Translation Switcher Button -->
+        <button 
+          id="lang-toggle-btn"
+          class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 transition-all shadow-xs active:scale-95"
+          title="Switch Language / Sprache wechseln"
+        >
+          <span id="lang-flag">🇬🇧</span>
+          <span id="lang-code">EN</span>
+        </button>
+
+        <!-- Theme Toggle Button -->
+        <button 
+          id="theme-toggle-btn"
+          class="p-2 rounded-xl text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors active:scale-95"
+          title="Design wechseln (Hell/Dunkel)"
+        >
+          <svg id="theme-icon-light" class="w-4 h-4 sm:w-5 sm:h-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+          </svg>
+          <svg id="theme-icon-dark" class="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Search Row -->
+    <div class="sm:hidden px-3 pb-2.5">
+      <div class="relative">
+        <input 
+          type="text" 
+          oninput="handleSearchInput(this.value)"
+          placeholder="Audios durchsuchen (z. B. 02, Begrüßung)..."
+          class="w-full pl-8 pr-8 py-2 rounded-xl text-xs bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+        >
+        <div class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-slate-400">
+          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container (optimized bottom padding for mobile sticky player) -->
+  <main class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 pb-56 sm:pb-40">
+    
+    <!-- Top-level Navigation Tabs (A1, A2, B1, B2) -->
+    <section class="mb-5 sm:mb-6">
+      <div class="flex items-center justify-between mb-2.5 px-0.5">
+        <h2 id="level-section-header" class="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+          Sprachniveau auswählen
+        </h2>
+        <span id="cefr-badge-text" class="text-[10px] sm:text-xs text-slate-400">Gemeinsamer Europäischer Referenzrahmen (GER)</span>
+      </div>
+      <!-- Tabs rendered by JS -->
+      <div id="level-tabs-container" class="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3"></div>
+    </section>
+
+    <!-- Filter Tag Chips (smooth touch scroll) -->
+    <div class="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-2.5 mb-4 scrollbar-none -mx-3 px-3 sm:mx-0 sm:px-0">
+      <span class="text-xs font-semibold text-slate-400 flex-shrink-0">Filter:</span>
+      <button 
+        onclick="setFilterType('all')"
+        data-type="all"
+        data-i18n-filter="allCategories"
+        class="filter-chip px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition-all shadow-xs flex-shrink-0 active:scale-95"
+      >
+        Alle Kategorien
+      </button>
+      <button 
+        onclick="setFilterType('Dialog')"
+        data-type="Dialog"
+        data-i18n-filter="dialogues"
+        class="filter-chip px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 transition-all flex-shrink-0 active:scale-95"
+      >
+        💬 Dialoge
+      </button>
+      <button 
+        onclick="setFilterType('Phonetik')"
+        data-type="Phonetik"
+        data-i18n-filter="phonetics"
+        class="filter-chip px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 transition-all flex-shrink-0 active:scale-95"
+      >
+        🗣️ Phonetik
+      </button>
+      <button 
+        onclick="setFilterType('Hörtext')"
+        data-type="Hörtext"
+        data-i18n-filter="listening"
+        class="filter-chip px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 transition-all flex-shrink-0 active:scale-95"
+      >
+        🎧 Hörtexte
+      </button>
+      <button 
+        onclick="setFilterType('Übung')"
+        data-type="Übung"
+        data-i18n-filter="exercises"
+        class="filter-chip px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 transition-all flex-shrink-0 active:scale-95"
+      >
+        📝 Übungen
+      </button>
+      <button 
+        onclick="setFilterType('Wortschatz')"
+        data-type="Wortschatz"
+        data-i18n-filter="vocabulary"
+        class="filter-chip px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 transition-all flex-shrink-0 active:scale-95"
+      >
+        📖 Wortschatz
+      </button>
+    </div>
+
+    <!-- Live Search Status Banner -->
+    <div id="search-status" class="mb-4"></div>
+
+    <!-- Active Textbook Card & Section Filter (Teil 1 / Teil 2) -->
+    <section id="textbook-container"></section>
+
+    <!-- Chapters Accordion & Track List -->
+    <section id="chapters-container"></section>
+
+    <!-- Creator & Copyright Attribution Footer for Sahli Reda -->
+    <footer class="mt-14 pt-8 border-t border-slate-200 dark:border-slate-800 text-center text-xs text-slate-500 dark:text-slate-400 space-y-2 pb-6">
+      <div class="flex items-center justify-center gap-2">
+        <span class="font-extrabold text-sm text-slate-800 dark:text-slate-200">DeutschAudio Portal</span>
+        <span class="de-flag-pill shadow-xs">
+          <span class="bg-black"></span>
+          <span class="bg-red-600"></span>
+          <span class="bg-amber-400"></span>
+        </span>
+      </div>
+      <p class="font-medium text-slate-700 dark:text-slate-300">
+        © 2024–2026 <strong class="text-indigo-600 dark:text-indigo-400 font-extrabold">Sahli Reda</strong>. All Rights Reserved / Alle Rechte vorbehalten.
+      </p>
+      <p class="text-[11px] text-slate-400 dark:text-slate-500 max-w-md mx-auto">
+        Designed & Developed by Sahli Reda. Optimized for smartphones, tablets & desktop computers.
+      </p>
+    </footer>
+
+  </main>
+
+  <!-- Sticky Bottom Audio Player Bar (Mobile 2-Tier & Desktop 3-Column) -->
+  <footer id="bottom-player" class="fixed bottom-0 left-0 right-0 z-40 glass-player border-t border-slate-200/90 dark:border-slate-800/90 shadow-2xl backdrop-blur-xl">
+    
+    <!-- Top Micro Progress Scrubber for Precision Seeking -->
+    <div class="relative w-full group">
+      <input 
+        type="range" 
+        id="audio-progress" 
+        min="0" 
+        max="100" 
+        value="0" 
+        step="0.1"
+        class="w-full h-2 bg-slate-200 dark:bg-slate-800 accent-indigo-600 cursor-pointer block transition-all"
+        title="Zum Vor- oder Zurückspulen ziehen / Drag to seek"
+      >
+    </div>
+
+    <!-- Player Inner Content -->
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2 sm:py-3 safe-bottom-player">
+      
+      <!-- ======================================================== -->
+      <!-- MOBILE VIEW (< md): 2-Tier Touch Layout -->
+      <!-- ======================================================== -->
+      <div class="flex flex-col gap-1.5 md:hidden">
+        <!-- Mobile Row 1: Track Info, Time, Speed & Transcript Button -->
+        <div class="flex items-center justify-between gap-2">
+          <!-- Active Track Info -->
+          <div class="flex items-center gap-2 min-w-0 flex-1">
+            <div id="player-equalizer-mobile" class="equalizer-paused w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200/60 dark:border-indigo-800/50 flex items-center justify-center gap-0.5 text-indigo-600 dark:text-indigo-400 flex-shrink-0 shadow-xs">
+              <span class="equalizer-bar"></span>
+              <span class="equalizer-bar"></span>
+              <span class="equalizer-bar"></span>
+            </div>
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-1.5">
+                <span id="player-level-badge-mobile" class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-indigo-600 text-white">
+                  A1
+                </span>
+                <h3 id="player-track-title-mobile" class="text-xs font-bold text-slate-900 dark:text-white truncate">
+                  Wähle einen Track...
+                </h3>
+              </div>
+              <div class="flex items-center justify-between gap-2 mt-0.5">
+                <p id="player-track-meta-mobile" class="text-[10px] text-slate-500 dark:text-slate-400 truncate">
+                  Bereit zum Abspielen
+                </p>
+                <span id="mobile-time-display" class="text-[10px] font-mono text-slate-400 flex-shrink-0">
+                  00:00 / 00:00
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Actions on Mobile: Speed & Transcript -->
+          <div class="flex items-center gap-1.5 flex-shrink-0">
+            <button 
+              id="speed-btn-mobile"
+              onclick="cyclePlaybackSpeed()"
+              class="px-2 py-1 rounded-lg text-[11px] font-mono font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 active:scale-95 transition-all"
+              title="Tempo ändern"
+            >
+              1.0x
+            </button>
+            <button 
+              onclick="if (state.currentTrackObj) openTranscriptModal(state.currentTrackObj.track.id);"
+              class="p-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800/50 active:scale-95 transition-all"
+              title="Transkript anzeigen"
+            >
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Mobile Row 2: Touch-Optimized Primary Controls -->
+        <div class="flex items-center justify-between px-2 pt-1 border-t border-slate-100 dark:border-slate-800/80">
+          <!-- Shuffle -->
+          <button 
+            id="shuffle-btn-mobile"
+            onclick="toggleShuffle()"
+            class="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 active:scale-90 transition-transform"
+            title="Shuffle"
+          >
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4h4l4 5-4 5H4M16 4h4v4M20 4l-7 7M4 20h4l8-10h4M16 20h4v-4M20 20l-4-4" />
+            </svg>
+          </button>
+
+          <!-- Skip Back -10s -->
+          <button 
+            onclick="skipTime(-10)"
+            class="p-2 rounded-full text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 active:scale-90 transition-transform"
+            title="-10s"
+          >
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0019 16V8a1 1 0 00-1.6-.8l-5.334 4zM4.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0011 16V8a1 1 0 00-1.6-.8l-5.334 4z" />
+            </svg>
+          </button>
+
+          <!-- Previous Track -->
+          <button 
+            onclick="playPrevTrack()"
+            class="p-2 text-slate-600 dark:text-slate-300 active:scale-90 transition-transform"
+            title="Vorheriger Track"
+          >
+            <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+              <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/>
+            </svg>
+          </button>
+
+          <!-- Big Main Touch Play / Pause Button -->
+          <button 
+            onclick="togglePlayPause()"
+            class="w-11 h-11 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white flex items-center justify-center shadow-lg shadow-indigo-500/30 active:scale-90 transition-all flex-shrink-0"
+            title="Play / Pause"
+          >
+            <svg id="play-icon-mobile" class="w-5 h-5 fill-current ml-0.5" viewBox="0 0 24 24">
+              <path d="M8 5v14l11-7z"/>
+            </svg>
+            <svg id="pause-icon-mobile" class="w-5 h-5 fill-current hidden" viewBox="0 0 24 24">
+              <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+            </svg>
+          </button>
+
+          <!-- Next Track -->
+          <button 
+            onclick="playNextTrack(false)"
+            class="p-2 text-slate-600 dark:text-slate-300 active:scale-90 transition-transform"
+            title="Nächster Track"
+          >
+            <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+              <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/>
+            </svg>
+          </button>
+
+          <!-- Skip Forward +10s -->
+          <button 
+            onclick="skipTime(10)"
+            class="p-2 rounded-full text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 active:scale-90 transition-transform"
+            title="+10s"
+          >
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.933 12.8a1 1 0 000-1.6L6.6 7.2A1 1 0 005 8v8a1 1 0 001.6.8l5.333-4zM19.933 12.8a1 1 0 000-1.6l-5.333-4A1 1 0 0013 8v8a1 1 0 001.6.8l5.333-4z" />
+            </svg>
+          </button>
+
+          <!-- Repeat -->
+          <button 
+            id="repeat-btn-mobile"
+            onclick="toggleRepeat()"
+            class="relative p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 active:scale-90 transition-transform"
+            title="Repeat"
+          >
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- ======================================================== -->
+      <!-- DESKTOP VIEW (>= md): Full 3-Column Layout -->
+      <!-- ======================================================== -->
+      <div class="hidden md:flex items-center justify-between gap-6">
+        
+        <!-- Left: Active Track Meta -->
+        <div class="flex items-center gap-3 min-w-0 max-w-sm">
+          <div id="player-equalizer" class="equalizer-paused w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200/60 dark:border-indigo-800/50 flex items-center justify-center gap-0.5 text-indigo-600 dark:text-indigo-400 flex-shrink-0 shadow-xs">
+            <span class="equalizer-bar"></span>
+            <span class="equalizer-bar"></span>
+            <span class="equalizer-bar"></span>
+            <span class="equalizer-bar"></span>
+          </div>
+
+          <div class="min-w-0">
+            <div class="flex items-center gap-1.5">
+              <span id="player-level-badge" class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-indigo-600 text-white">
+                A1
+              </span>
+              <h3 id="player-track-title" class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white truncate">
+                Wähle einen Track...
+              </h3>
+            </div>
+            <p id="player-track-meta" class="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5">
+              Bereit zum Abspielen
+            </p>
+            <span id="tts-mode-indicator" class="hidden inline-flex items-center text-[10px] text-amber-600 dark:text-amber-400 font-semibold gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping"></span>
+              Sprachausgabe (TTS) aktiv
+            </span>
+          </div>
+        </div>
+
+        <!-- Center: Playback Controls -->
+        <div class="flex flex-col items-center flex-1 max-w-xl">
+          <div class="flex items-center gap-4">
+            <button 
+              id="shuffle-btn"
+              class="p-2 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+              title="Zufallswiedergabe"
+            >
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4h4l4 5-4 5H4M16 4h4v4M20 4l-7 7M4 20h4l8-10h4M16 20h4v-4M20 20l-4-4" />
+              </svg>
+            </button>
+
+            <button 
+              id="skip-back-btn"
+              class="p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:text-indigo-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              title="10 Sekunden zurück"
+            >
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0019 16V8a1 1 0 00-1.6-.8l-5.334 4zM4.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0011 16V8a1 1 0 00-1.6-.8l-5.334 4z" />
+              </svg>
+            </button>
+
+            <button 
+              id="prev-track-btn"
+              class="p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:text-indigo-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              title="Vorheriger Track"
+            >
+              <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/>
+              </svg>
+            </button>
+
+            <button 
+              id="play-pause-btn"
+              class="w-12 h-12 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white flex items-center justify-center shadow-lg shadow-indigo-500/30 hover:scale-105 active:scale-95 transition-all"
+              title="Abspielen / Anhalten (Leertaste)"
+            >
+              <svg id="play-icon" class="w-5 h-5 fill-current ml-0.5" viewBox="0 0 24 24">
+                <path d="M8 5v14l11-7z"/>
+              </svg>
+              <svg id="pause-icon" class="w-5 h-5 fill-current hidden" viewBox="0 0 24 24">
+                <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+              </svg>
+            </button>
+
+            <button 
+              id="next-track-btn"
+              class="p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:text-indigo-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              title="Nächster Track"
+            >
+              <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/>
+              </svg>
+            </button>
+
+            <button 
+              id="skip-fwd-btn"
+              class="p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:text-indigo-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              title="10 Sekunden vor"
+            >
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.933 12.8a1 1 0 000-1.6L6.6 7.2A1 1 0 005 8v8a1 1 0 001.6.8l5.333-4zM19.933 12.8a1 1 0 000-1.6l-5.333-4A1 1 0 0013 8v8a1 1 0 001.6.8l5.333-4z" />
+              </svg>
+            </button>
+
+            <button 
+              id="repeat-btn"
+              class="relative p-2 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+              title="Wiederholung (Aus / Alle / Aktueller)"
+            >
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+            </button>
+          </div>
+
+          <div class="flex items-center gap-1.5 text-[11px] font-mono text-slate-500 dark:text-slate-400 mt-1">
+            <span id="current-time-display">00:00</span>
+            <span>/</span>
+            <span id="duration-display">00:00</span>
+          </div>
+        </div>
+
+        <!-- Right: Speed, Volume & Transcript -->
+        <div class="flex items-center gap-3">
+          <button 
+            id="speed-btn"
+            class="px-2.5 py-1 rounded-lg text-xs font-mono font-bold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors"
+            title="Wiedergabegeschwindigkeit ändern"
+          >
+            1.0x
+          </button>
+
+          <button 
+            id="show-transcript-btn"
+            class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            title="Transkript anzeigen"
+          >
+            <svg class="w-4 h-4 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            <span id="transcript-btn-label">Transkript</span>
+          </button>
+
+          <!-- Volume Control -->
+          <div class="flex items-center gap-2">
+            <button 
+              id="mute-btn"
+              class="text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition-colors"
+              title="Stummschalten (M)"
+            >
+              <svg id="vol-icon-high" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+              </svg>
+              <svg id="vol-icon-muted" class="w-4 h-4 hidden text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+              </svg>
+            </button>
+            <input 
+              type="range" 
+              id="volume-slider" 
+              min="0" 
+              max="1" 
+              step="0.05" 
+              value="0.85" 
+              class="w-20 h-1.5 bg-slate-200 dark:bg-slate-700 accent-indigo-600 rounded-lg cursor-pointer"
+              title="Lautstärke anpassen"
+            >
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </footer>
+
+  <!-- Bilingual Transcript Modal -->
+  <div id="transcript-modal" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-sm hidden">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-2xl w-full p-4 sm:p-6 shadow-2xl border border-slate-200 dark:border-slate-800 max-h-[88vh] flex flex-col">
+      <div class="flex items-start justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+        <div class="min-w-0 pr-2">
+          <span id="transcript-modal-meta" class="text-[11px] sm:text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider block truncate">
+            A1 · Kapitel 1
+          </span>
+          <h3 id="transcript-modal-title" class="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white mt-0.5 truncate">
+            Dialog 1a: Herzlich Willkommen!
+          </h3>
+        </div>
+        <button onclick="closeTranscriptModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1.5 active:scale-90 flex-shrink-0">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Bilingual View Mode Selector Tabs -->
+      <div class="pt-3 pb-2 flex items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800 overflow-x-auto scrollbar-none">
+        <div class="inline-flex rounded-xl bg-slate-100 dark:bg-slate-800 p-1 border border-slate-200 dark:border-slate-700 flex-shrink-0">
+          <button 
+            id="tab-transcript-bilingual" 
+            onclick="setTranscriptTab('bilingual')" 
+            class="px-2.5 sm:px-3 py-1 rounded-lg text-[11px] sm:text-xs font-bold bg-indigo-600 text-white shadow-xs transition-all"
+          >
+            📖 Zweisprachig (DE/EN)
+          </button>
+          <button 
+            id="tab-transcript-de" 
+            onclick="setTranscriptTab('de')" 
+            class="px-2.5 sm:px-3 py-1 rounded-lg text-[11px] sm:text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all"
+          >
+            🇩🇪 Deutsch
+          </button>
+          <button 
+            id="tab-transcript-en" 
+            onclick="setTranscriptTab('en')" 
+            class="px-2.5 sm:px-3 py-1 rounded-lg text-[11px] sm:text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all"
+          >
+            🇬🇧 English
+          </button>
+        </div>
+      </div>
+
+      <!-- Transcript body with nice typography -->
+      <div id="transcript-modal-body" class="py-4 overflow-y-auto flex-1 text-sm sm:text-base text-slate-700 dark:text-slate-200 leading-relaxed font-sans">
+        <!-- Injected via JS -->
+      </div>
+
+      <div class="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
+        <span id="transcript-tip-text" class="text-[11px] text-slate-400 truncate">💡 Tipp: Lesen Sie laut mit.</span>
+        <button 
+          id="transcript-close-btn"
+          onclick="closeTranscriptModal()"
+          class="px-4 py-1.5 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 transition-colors flex-shrink-0 active:scale-95"
+        >
+          Schließen
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Toast Notification -->
+  <div 
+    id="app-toast" 
+    class="fixed bottom-28 sm:bottom-24 right-4 sm:right-6 z-50 max-w-xs sm:max-w-sm px-4 py-2.5 rounded-xl bg-slate-900/95 text-white text-xs font-semibold shadow-2xl border border-slate-700/60 backdrop-blur-md transform transition-all duration-300 opacity-0 translate-y-4 pointer-events-none flex items-center gap-2"
+  >
+    <svg class="w-4 h-4 text-indigo-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+    <span id="toast-message">Mitteilung</span>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
