@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <clipPath id="squircle">
+      <rect x="0" y="0" width="64" height="64" rx="16" ry="16" />
+    </clipPath>
+    <linearGradient id="flagGloss" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.15" />
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.1" />
+    </linearGradient>
+  </defs>
+  <!-- Rounded German Flag Badge -->
+  <g clip-path="url(#squircle)">
+    <!-- Black Stripe -->
+    <rect x="0" y="0" width="64" height="21.33" fill="#000000" />
+    <!-- Red Stripe -->
+    <rect x="0" y="21.33" width="64" height="21.33" fill="#DD0000" />
+    <!-- Gold / Yellow Stripe -->
+    <rect x="0" y="42.66" width="64" height="21.34" fill="#FFCE00" />
+    <!-- Subtle overlay highlight -->
+    <rect x="0" y="0" width="64" height="64" fill="url(#flagGloss)" />
+  </g>
+  <!-- Subtle border for contrast on black tabs -->
+  <rect x="0.5" y="0.5" width="63" height="63" rx="16" ry="16" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1" />
+</svg>
+

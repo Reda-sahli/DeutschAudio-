@@ -21,6 +21,8 @@ const I18N = {
     listening: "🎧 Hörtexte",
     exercises: "📝 Übungen",
     vocabulary: "📖 Wortschatz",
+    openPdf: "📖 Lehrbuch (PDF)",
+    openPdfDesc: "Spektrum Deutsch A1+ Lehrbuch (PDF) öffnen",
     allParts: "Alle Teile",
     bookSection: "Buchteil:",
     expandAll: "Alle ausklappen",
@@ -76,6 +78,8 @@ const I18N = {
     listening: "🎧 Listening Texts",
     exercises: "📝 Exercises",
     vocabulary: "📖 Vocabulary",
+    openPdf: "📖 Coursebook (PDF)",
+    openPdfDesc: "Open Spektrum Deutsch A1+ Coursebook (PDF)",
     allParts: "All Parts",
     bookSection: "Book Section:",
     expandAll: "Expand All",
@@ -242,8 +246,16 @@ function initDomReferences() {
   dom.shuffleBtnMobile = document.getElementById("shuffle-btn-mobile");
   dom.repeatBtnMobile = document.getElementById("repeat-btn-mobile");
 
-  // Modals
+  // Modals & PDF
   dom.transcriptModal = document.getElementById("transcript-modal");
+  dom.pdfModal = document.getElementById("pdf-modal");
+  dom.pdfIframe = document.getElementById("pdf-iframe");
+  dom.pdfExternalLink = document.getElementById("pdf-external-link");
+  dom.pdfModalTitle = document.getElementById("pdf-modal-title");
+  dom.pdfModalSub = document.getElementById("pdf-modal-sub");
+  dom.pdfFileInput = document.getElementById("pdf-file-input");
+  dom.navPdfBtn = document.getElementById("nav-pdf-btn");
+  dom.navPdfLabel = document.getElementById("nav-pdf-label");
   dom.toast = document.getElementById("app-toast");
   dom.toastMessage = document.getElementById("toast-message");
 }
@@ -289,7 +301,7 @@ function updateStaticUiTranslations() {
 
   const appSub = document.getElementById("app-subtitle-text");
   if (appSub) {
-    appSub.innerHTML = `by <span class="font-bold text-slate-700 dark:text-slate-200">Sahli Reda</span> · Spektrum A1+ (${isEn ? '12 Chapters' : '12 Kapitel'})`;
+    appSub.innerHTML = `by <a href="https://www.linkedin.com/in/sahli-reda-b93807268/" target="_blank" rel="noopener noreferrer" class="font-bold text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-400 hover:underline transition-colors">Sahli Reda</a> · Spektrum A1+ (${isEn ? '12 Chapters' : '12 Kapitel'})`;
   }
 
   const levelHeader = document.getElementById("level-section-header");
@@ -312,6 +324,10 @@ function updateStaticUiTranslations() {
 
   const transcriptBtnText = document.getElementById("transcript-btn-label");
   if (transcriptBtnText) transcriptBtnText.textContent = t("transcript");
+
+  if (dom.navPdfLabel) {
+    dom.navPdfLabel.textContent = isEn ? "Coursebook PDF" : "Lehrbuch PDF";
+  }
 }
 
 /**
@@ -505,6 +521,9 @@ function loadTrack(trackObj, autoPlay = true) {
           handleAudioLoadError();
         });
       }
+    } else {
+      state.isPlaying = false;
+      updatePlayPauseStateUI(false);
     }
   } catch (err) {
     handleAudioLoadError();
@@ -981,6 +1000,17 @@ function renderTextbookHeader(level, book) {
             </svg>
             ${t("playAll")}
           </button>
+
+          <button 
+            onclick="openPdfModal()"
+            class="w-full sm:w-auto px-4 sm:px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm bg-white/20 hover:bg-white/30 text-white backdrop-blur-md border border-white/30 shadow-md transition-all flex items-center justify-center gap-2 active:scale-95"
+            title="${t('openPdfDesc')}"
+          >
+            <svg class="w-4 h-4 text-amber-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+            <span>${t('openPdf')}</span>
+          </button>
         </div>
       </div>
 
@@ -1213,7 +1243,7 @@ function renderTrackRow(track, chapter, section, book, level) {
         <!-- Touch Play / Pause Icon Button -->
         <button 
           class="track-play-btn w-10 h-10 sm:w-11 sm:h-11 rounded-full flex-shrink-0 flex items-center justify-center bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 group-hover:bg-indigo-600 group-hover:text-white transition-all shadow-xs active:scale-90"
-          onclick="event.stopPropagation(); handleTrackRowClick('${track.id}')"
+          onclick="event.stopPropagation(); handleTrackPlayButtonClick('${track.id}')"
           title="Play Track"
         >
           <svg class="row-play-icon w-4 h-4 fill-current ml-0.5" viewBox="0 0 24 24">
@@ -1285,7 +1315,20 @@ function handleTrackRowClick(trackId) {
   } else {
     const trackObj = findTrackById(trackId);
     if (trackObj) {
-      loadTrack(trackObj, true);
+      loadTrack(trackObj, false); // Standby mode: does NOT autoplay!
+      updateActiveTrackHighlight();
+      showToast(state.currentLanguage === "en" ? `Selected: ${trackObj.track.titleEn || trackObj.track.title}` : `Ausgewählt: ${trackObj.track.title}`, 1200);
+    }
+  }
+}
+
+function handleTrackPlayButtonClick(trackId) {
+  if (state.currentTrackObj && state.currentTrackObj.track.id === trackId) {
+    togglePlayPause();
+  } else {
+    const trackObj = findTrackById(trackId);
+    if (trackObj) {
+      loadTrack(trackObj, true); // User explicitly clicked Play button
     }
   }
 }
@@ -1479,6 +1522,47 @@ function renderTranscriptModalContent() {
 
 function closeTranscriptModal() {
   dom.transcriptModal.classList.add("hidden");
+  document.body.style.overflow = "";
+}
+
+/**
+ * Coursebook PDF Reader Modal Controller
+ */
+function openPdfModal(customUrl, title) {
+  const isEn = state.currentLanguage === "en";
+  const level = DEUTSCH_PORTAL_DATA.levels.find(l => l.id === state.currentLevelId) || DEUTSCH_PORTAL_DATA.levels[0];
+  const book = level.textbooks && level.textbooks[0];
+
+  const defaultPdf = book?.pdfUrl || "books/A1/Spektrum%20Deutsch%20A1%20Kurs-%20und%20Arbeitsbuch.pdf";
+  const targetUrl = customUrl || defaultPdf;
+  const bookName = title || (isEn ? (book?.pdfTitleEn || "Spektrum Deutsch A1+ Coursebook (PDF)") : (book?.pdfTitle || "Spektrum Deutsch A1+ Lehrbuch (PDF)"));
+
+  if (dom.pdfIframe) {
+    dom.pdfIframe.src = targetUrl;
+  }
+  if (dom.pdfExternalLink) {
+    dom.pdfExternalLink.href = targetUrl;
+  }
+  if (dom.pdfModalTitle) {
+    dom.pdfModalTitle.textContent = bookName;
+  }
+  if (dom.pdfModalSub) {
+    dom.pdfModalSub.textContent = isEn 
+      ? "Integrated Course- and Exercise Book DaF · Spektrum Deutsch A1+" 
+      : "Integriertes Kurs- und Arbeitsbuch DaF · Spektrum Deutsch A1+";
+  }
+
+  if (dom.pdfModal) {
+    dom.pdfModal.classList.remove("hidden");
+    document.body.style.overflow = "hidden";
+  }
+}
+
+function closePdfModal() {
+  if (dom.pdfModal) {
+    dom.pdfModal.classList.add("hidden");
+    document.body.style.overflow = "";
+  }
 }
 
 function copyTrackPath(path) {
@@ -1550,6 +1634,7 @@ function setupKeyboardShortcuts() {
       dom.searchInput?.focus();
     } else if (e.key === "Escape") {
       closeTranscriptModal();
+      closePdfModal();
     }
   });
 }
@@ -1608,4 +1693,47 @@ function setupEventListeners() {
       openTranscriptModal(state.currentTrackObj.track.id);
     }
   });
+
+  // PDF Event Listeners
+  dom.navPdfBtn?.addEventListener("click", () => openPdfModal());
+
+  dom.pdfFileInput?.addEventListener("change", (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (file) {
+      const fileUrl = URL.createObjectURL(file);
+      openPdfModal(fileUrl, file.name);
+      showToast(state.currentLanguage === "en" ? `Loaded: ${file.name}` : `Geladen: ${file.name}`, 2000);
+    }
+  });
+
+  dom.pdfModal?.addEventListener("click", (e) => {
+    if (e.target === dom.pdfModal) {
+      closePdfModal();
+    }
+  });
 }
+
+// Global Window Exports
+window.openPdfModal = openPdfModal;
+window.closePdfModal = closePdfModal;
+window.handleTrackRowClick = handleTrackRowClick;
+window.handleTrackPlayButtonClick = handleTrackPlayButtonClick;
+window.openTranscriptModal = openTranscriptModal;
+window.closeTranscriptModal = closeTranscriptModal;
+window.setTranscriptTab = setTranscriptTab;
+window.switchLevel = switchLevel;
+window.filterSection = filterSection;
+window.filterTrackType = filterTrackType;
+window.toggleAccordion = toggleAccordion;
+window.toggleAllAccordions = toggleAllAccordions;
+window.playChapterTracks = playChapterTracks;
+window.playFirstTrackOfLevel = playFirstTrackOfLevel;
+window.clearSearch = clearSearch;
+window.copyTrackPath = copyTrackPath;
+window.togglePlayPause = togglePlayPause;
+window.playPrevTrack = playPrevTrack;
+window.playNextTrack = playNextTrack;
+window.skipTime = skipTime;
+window.cyclePlaybackSpeed = cyclePlaybackSpeed;
+window.toggleRepeat = toggleRepeat;
+window.toggleShuffle = toggleShuffle;

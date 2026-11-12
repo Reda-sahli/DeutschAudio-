@@ -32,6 +32,10 @@ const DEUTSCH_PORTAL_DATA = {
           edition: "Ausgabe 2024 / 2. Auflage",
           editionEn: "2024 Edition / 2nd Edition",
           coverBg: "from-emerald-600 to-teal-700",
+          pdfUrl: "books/A1/Spektrum%20Deutsch%20A1%20Kurs-%20und%20Arbeitsbuch.pdf",
+          pdfFilename: "Spektrum Deutsch A1 Kurs- und Arbeitsbuch.pdf",
+          pdfTitle: "Spektrum Deutsch A1+ Lehrbuch (PDF)",
+          pdfTitleEn: "Spektrum Deutsch A1+ Coursebook (PDF)",
           sections: [
             {
               id: "a1-teil-1",
